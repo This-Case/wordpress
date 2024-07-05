@@ -1,0 +1,45 @@
+#LAB 1
+docker run -d --name=mongodb --network=my-net mongo:4
+docker run -d --name=backend --network=my-net -e PORT=7000 -e GUESTBOOK_DB_ADDR=mongodb:27017 wikentbl/guestbook-be:v1
+docker logs backend
+docker run -d -p 3000:7000 -e PORT=7000 -e GUESTBOOK_API_ADDR=backend:7000 --network=my-net wikentbl/guestbook-fe:v1
+
+
+
+
+#LAB 2
+docker-compose.yml
+
+version: '2.0'
+services:
+  frontend:
+    image: wikentbl/guestbook-fe:v1
+    environment:
+      - PORT=7000
+      - GUESTBOOK_API_ADDR=backend:7000
+    ports:
+      - "3000:7000"
+    networks:
+      - my-net
+  backend:
+    image: wikentbl/guestbook-be:v1
+    environment:
+      - PORT=7000
+      - GUESTBOOK_DB_ADDR=mongodb:27017
+    ports:
+      - "7000:80"
+    restart: always
+    networks:
+      - my-net
+  mongodb:
+    image: mongo:4
+    networks:
+      - my-net
+
+networks:
+  my-net:
+    driver: bridge
+
+
+
+$docker-compose up -d
